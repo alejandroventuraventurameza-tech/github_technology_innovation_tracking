@@ -1,0 +1,26 @@
+# Environment
+.env
+__pycache__/
+*.py[cod]
+
+# Data (raw files can be large)
+data/raw/*
+data/processed/*
+data/labeled/*
+data/splits/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/labeled/.gitkeep
+!data/splits/.gitkeep
+
+# Models
+models/trained_models/*
+!models/trained_models/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
