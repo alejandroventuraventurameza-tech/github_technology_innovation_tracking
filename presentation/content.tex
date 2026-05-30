@@ -1,0 +1,422 @@
+% ============================================================
+% PORTADA
+% ============================================================
+{
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{footline}{}
+  \begin{frame}[plain]
+    \titlepage
+  \end{frame}
+}
+
+% ============================================================
+% TABLA DE CONTENIDOS
+% ============================================================
+{
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{footline}{}
+  \begin{frame}{Outline}
+    \tableofcontents
+  \end{frame}
+}
+
+% ============================================================
+\section{Problem Definition}
+% ============================================================
+
+\begin{frame}{What problem are we solving?}
+
+  The open-source econometrics ecosystem is vast and fragmented.
+  Researchers, central banks, and consulting firms need to answer:
+
+  \bigskip
+  \begin{block}{Central question}
+    \centering
+    \textit{Which quantitative economics tools are \textbf{gaining momentum},
+    which are \textbf{established}, and which are \textbf{fading away}?}
+  \end{block}
+
+  \bigskip
+  \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{The challenge:}
+    \begin{itemize}
+      \item Thousands of GitHub repos — impossible to review manually
+      \item No ground-truth labels for technology maturity
+      \item Signals are noisy and multidimensional
+    \end{itemize}
+
+    \column{0.5\textwidth}
+    \textbf{Our solution:}
+    \begin{itemize}
+      \item Collect 12 GitHub signals per repository
+      \item Use DeepSeek (LLM) to generate \textit{weak labels}
+      \item Fine-tune DistilBERT to learn the classification
+    \end{itemize}
+  \end{columns}
+
+\end{frame}
+
+% ------------------------------------------------------------
+
+\begin{frame}{Four categories of technological maturity}
+
+  \begin{columns}
+    \column{0.48\textwidth}
+
+    \begin{block}{\textcolor{emerging}{\textbf{Emerging}}}
+      Fast-growing, recent momentum, high activity.
+      \textit{Ex: new causal inference libraries, nowcasting tools.}
+    \end{block}
+
+    \vspace{0.4em}
+
+    \begin{block}{\textcolor{mature}{\textbf{Mature}}}
+      Stable, widely adopted, long track record.
+      \textit{Ex: \texttt{statsmodels}, \texttt{linearmodels}.}
+    \end{block}
+
+    \column{0.48\textwidth}
+
+    \begin{block}{\textcolor{declining}{\textbf{Declining}}}
+      Decreasing activity, long inactivity periods.
+      \textit{Ex: abandoned DSGE wrappers, unmaintained R ports.}
+    \end{block}
+
+    \vspace{0.4em}
+
+    \begin{block}{\textcolor{experimental}{\textbf{Experimental / Niche}}}
+      Early-stage or highly specialized, limited adoption.
+      \textit{Ex: structural estimation solvers, VAR extensions.}
+    \end{block}
+
+  \end{columns}
+
+  \bigskip
+  \small These categories were designed to reflect \textbf{technological momentum},
+  not code quality.
+
+\end{frame}
+
+% ============================================================
+\section{Data Collection \& Signals}
+% ============================================================
+
+\begin{frame}{GitHub data collection}
+
+  \begin{bluebox}{Collection strategy}
+    587 repositories collected via 15 keyword/topic queries targeting the
+    \textbf{Econometrics \& Macro Tooling} ecosystem using the GitHub REST API.
+    Queries include: \texttt{econometrics}, \texttt{macroeconomics}, \texttt{dsge},
+    \texttt{panel-data}, \texttt{time-series}, \texttt{cointegration}, \texttt{nowcasting},
+    \texttt{causal-inference}, \texttt{structural-estimation}.
+  \end{bluebox}
+
+  \bigskip
+  \textbf{Why this ecosystem?}
+  \begin{itemize}
+    \item Natural mix of the four maturity categories (mature tools like
+          \texttt{statsmodels} coexist with experimental DSGE solvers)
+    \item Domain expertise enables better justification of design choices
+    \item Business relevance: central banks, IMF, consulting firms rely on these tools
+  \end{itemize}
+
+  \bigskip
+  \small \textbf{Potential bias:} GitHub search favors popular, well-maintained repos.
+  Niche or abandoned tools may be underrepresented.
+
+\end{frame}
+
+% ------------------------------------------------------------
+
+\begin{frame}{12 repository signals}
+
+  \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{Direct signals:}
+    \begin{itemize}
+      \item \texttt{stars} — popularity proxy
+      \item \texttt{forks} — adoption proxy
+      \item \texttt{contributors\_count} — ecosystem breadth
+      \item \texttt{weekly\_commit\_avg} — development velocity
+      \item \texttt{days\_since\_last\_push} — recency / abandonment
+      \item \texttt{repo\_age\_days} — maturity
+      \item \texttt{releases\_count} — production-readiness
+      \item \texttt{open/closed\_issues} — community activity
+      \item \texttt{has\_ci} — engineering maturity
+      \item \texttt{readme\_length} — documentation quality
+    \end{itemize}
+
+    \column{0.48\textwidth}
+    \textbf{Derived features:}
+    \begin{itemize}
+      \item \texttt{activity\_score} — composite score (commits, recency, CI, issue resolution)
+      \item \texttt{stars\_per\_day} — normalized growth rate
+      \item \texttt{fork\_star\_ratio} — adoption vs.\ interest
+      \item \texttt{issue\_resolution\_rate} — community responsiveness
+    \end{itemize}
+
+    \bigskip
+    \begin{block}{Key insight}
+      No single signal determines maturity. A declining repo can have
+      many stars — it may have been popular and then abandoned.
+    \end{block}
+  \end{columns}
+
+\end{frame}
+
+% ============================================================
+\section{LLM Weak Labeling}
+% ============================================================
+
+\begin{frame}{From signals to text summaries}
+
+  Before labeling, each repository is converted into a \textbf{plain-English paragraph}:
+
+  \bigskip
+  \begin{exampleblock}{Example summary — \texttt{statsmodels/statsmodels}}
+    \small
+    \textit{``Repository `statsmodels/statsmodels' is 15.0 years old and written primarily in Python.
+    It has 11,435 stars and 3,343 forks, with 457 contributors. Development velocity: very active
+    with 6.2 commits per week on average, and it was updated within the last month. It has 31
+    releases, 2,973 open issues, and 1 closed issue. The project has extensive README documentation
+    and has CI/CD workflows configured. Overall activity score: 0.61/1.0.''}
+  \end{exampleblock}
+
+  \bigskip
+  \textbf{Why natural language?}
+  \begin{itemize}
+    \item LLMs reason better over text than raw tabular values
+    \item Verbalizing signals (``last updated 3 years ago'') encodes domain knowledge
+    \item Same representation is used as input for DistilBERT fine-tuning
+  \end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------
+
+\begin{frame}{DeepSeek as weak annotator}
+
+  \begin{bluebox}{Weak supervision}
+    Instead of manually labeling 587 repositories, we use \textbf{DeepSeek-V3}
+    (via OpenAI-compatible API) as the initial annotator. Labels are ``weak''
+    because they are machine-generated and may be noisy — the BERT model
+    learns to generalize beyond individual label errors.
+  \end{bluebox}
+
+  \bigskip
+  \textbf{Cost:} \$0.048 USD total for two full labeling runs (587 repos each).
+
+  \bigskip
+  \textbf{Prompt iteration — methodological sensitivity (Q4):}
+
+  \vspace{0.3em}
+  \begin{columns}
+    \column{0.48\textwidth}
+    \textbf{Baseline prompt:}\\
+    Strict definitions.\\[0.3em]
+    \small Emerging: 15 \ | \ Experimental: 122 \\
+    Mature: 113 \ \ \ | \ \ Declining: 337
+
+    \column{0.48\textwidth}
+    \textbf{Refined prompt:}\\
+    Nuanced + balance guidance.\\[0.3em]
+    \small Emerging: 27 \ | \ Experimental: 217 \\
+    Mature: 85 \ \ \ \ | \ \ Declining: 258
+  \end{columns}
+
+  \bigskip
+  \small The refined prompt increased \texttt{emerging} coverage by 80\% and reduced
+  \texttt{declining} dominance from 57\% to 44\% of the dataset.
+
+\end{frame}
+
+% ============================================================
+\section{Model \& Results}
+% ============================================================
+
+\begin{frame}{DistilBERT fine-tuning pipeline}
+
+  \begin{columns}
+    \column{0.55\textwidth}
+    \textbf{Architecture:} \texttt{distilbert-base-uncased}
+    \begin{itemize}
+      \item 66M parameters (40\% fewer than BERT)
+      \item Input: repository text summary ($\leq$256 tokens)
+      \item Output: 4-class softmax head
+    \end{itemize}
+
+    \bigskip
+    \textbf{Training details:}
+    \begin{itemize}
+      \item Stratified split: 70/15/15
+      \item 410 train | 88 val | 89 test
+      \item 4 epochs, lr = 2e-5, batch = 16
+      \item Weighted cross-entropy loss to handle class imbalance
+      \item Best model at epoch 2 (Val F1 = 0.52)
+    \end{itemize}
+
+    \column{0.43\textwidth}
+    \textbf{Class weights (inverse frequency):}
+
+    \vspace{0.5em}
+    \begin{tabular}{lr}
+      \toprule
+      Class & Weight \\
+      \midrule
+      \textcolor{emerging}{emerging} & 2.576$\times$ \\
+      mature & 0.830$\times$ \\
+      declining & 0.272$\times$ \\
+      experimental & 0.322$\times$ \\
+      \bottomrule
+    \end{tabular}
+
+    \bigskip
+    \small Weights penalize errors on minority classes, especially \textcolor{emerging}{emerging}.
+  \end{columns}
+
+\end{frame}
+
+% ------------------------------------------------------------
+
+\begin{frame}{Test set results}
+
+  \begin{columns}
+    \column{0.45\textwidth}
+    \textbf{Overall performance:}
+
+    \vspace{0.5em}
+    \begin{tabular}{lr}
+      \toprule
+      Metric & Value \\
+      \midrule
+      Accuracy & 55.1\% \\
+      Macro F1 & 0.41 \\
+      \bottomrule
+    \end{tabular}
+
+    \vspace{1em}
+    \textbf{Per-class F1:}
+
+    \vspace{0.5em}
+    \begin{tabular}{lr}
+      \toprule
+      Class & F1 \\
+      \midrule
+      \textcolor{declining}{declining} & 0.64 \\
+      \textcolor{mature}{mature} & 0.55 \\
+      \textcolor{experimental}{experimental} & 0.47 \\
+      \textcolor{emerging}{emerging} & 0.00 \\
+      \bottomrule
+    \end{tabular}
+
+    \column{0.53\textwidth}
+    \begin{redbox}{Error analysis}
+      \begin{itemize}
+        \item \textbf{Emerging (F1=0.00):} only 4 test samples — insufficient signal despite class weighting. This is a \textit{known limitation} of weak supervision with severe imbalance.
+        \item \textbf{Declining vs.\ Experimental:} most frequent confusion — both share low-activity signals but differ in intentionality.
+        \item \textbf{Mature:} occasionally confused with declining for very old, slow-moving but stable projects.
+      \end{itemize}
+    \end{redbox}
+  \end{columns}
+
+\end{frame}
+
+% ============================================================
+\section{Business Value \& Limitations}
+% ============================================================
+
+\begin{frame}{Who can use this system?}
+
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{block}{Central banks \& governments}
+      Monitor which econometric tools are gaining traction to inform
+      software procurement, training investment, and research infrastructure decisions.
+      \textit{Ex: should a central bank adopt a new DSGE framework?}
+    \end{block}
+
+    \vspace{0.4em}
+
+    \begin{block}{Academic institutions}
+      Identify emerging methodological tools for curriculum updates and
+      faculty research priorities.
+    \end{block}
+
+    \column{0.48\textwidth}
+    \begin{block}{Consulting firms \& think tanks}
+      Track which quantitative methods are gaining or losing traction to
+      advise clients on tooling adoption.
+    \end{block}
+
+    \vspace{0.4em}
+
+    \begin{block}{Investors in developer tooling}
+      Identify growing open-source ecosystems with commercial potential
+      or flag declining tools before pivoting strategies.
+    \end{block}
+  \end{columns}
+
+\end{frame}
+
+% ------------------------------------------------------------
+
+\begin{frame}{Limitations \& future directions}
+
+  \begin{redbox}{Key limitations}
+    \begin{itemize}
+      \item \textbf{Weak labels are noisy:} DeepSeek may misclassify edge cases —
+            the model inherits these errors
+      \item \textbf{Severe imbalance in \texttt{emerging}:} 27 samples are insufficient
+            for reliable classification of this category
+      \item \textbf{Static snapshot:} data reflects a single collection point —
+            longitudinal signals (growth \textit{rate}) would be more informative
+      \item \textbf{Selection bias:} GitHub search favors popular repos —
+            niche or abandoned tools may be underrepresented
+    \end{itemize}
+  \end{redbox}
+
+  \bigskip
+  \textbf{Future directions:}
+  \begin{itemize}
+    \item Collect data at multiple time points to compute \textit{trend} signals
+    \item Expand to PyPI/CRAN download statistics for adoption validation
+    \item Use larger BERT models (DeBERTa-v3) with GPU training
+    \item Human-in-the-loop validation of LLM labels for minority classes
+  \end{itemize}
+
+\end{frame}
+
+% ============================================================
+% CONCLUSIÓN
+% ============================================================
+
+\begin{frame}{Summary}
+
+  \begin{greenbox}{What we built}
+    A complete \textbf{weak supervision NLP pipeline} that:
+    \begin{enumerate}
+      \item Collects 12 GitHub signals for 587 econometrics repositories
+      \item Converts signals into natural language summaries
+      \item Uses DeepSeek to generate weak labels (cost: \$0.048 USD)
+      \item Fine-tunes DistilBERT to classify technological maturity
+      \item Exposes results via a 4-tab Streamlit application
+    \end{enumerate}
+  \end{greenbox}
+
+  \bigskip
+  \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{Key takeaway:}\\[0.3em]
+    The value of the system is not its accuracy (55\%) —
+    it is its ability to \textbf{scale human judgment} over hundreds of
+    repositories at negligible cost, providing actionable ecosystem intelligence.
+
+    \column{0.48\textwidth}
+    \textbf{Methodological contribution:}\\[0.3em]
+    Prompt iteration (Q4) showed that label quality
+    and class balance are more important than model architecture
+    in weak supervision settings.
+  \end{columns}
+
+\end{frame}

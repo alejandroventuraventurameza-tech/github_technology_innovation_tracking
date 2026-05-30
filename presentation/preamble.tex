@@ -1,0 +1,257 @@
+% Configuración de XeLaTeX
+\usepackage{fontspec}
+\usepackage[english]{babel}
+
+% Paquetes matemáticos y gráficos
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{multicol}
+\usepackage{booktabs}
+
+% Paquetes para el tema personalizado
+\usepackage{tikz,etoolbox}
+\usetikzlibrary{shapes,arrows,positioning}
+
+% Paquete para que las páginas de apéndices no cuenten en la numeración
+\usepackage{appendixnumberbeamer}
+
+% Definir colores personalizados
+\definecolor{UWBlack}{HTML}{000000}
+\definecolor{UWWhite}{HTML}{FFFFFF}
+\definecolor{UWMathPinkL1}{HTML}{FFBEEF}
+\definecolor{UWMathPinkL2}{HTML}{FF63AA}
+\definecolor{UWMathPinkL3}{HTML}{DF2498}
+\definecolor{UWMathPinkL4}{HTML}{C60078}
+\definecolor{UWGrayL1}{HTML}{DFDFDF}
+\definecolor{UWGrayL2}{HTML}{A2A2A2}
+\definecolor{UWGrayL3}{HTML}{787878}
+\definecolor{UWGrayL4}{HTML}{000000}
+\definecolor{UWGoldL1}{HTML}{FFFFAA}
+\definecolor{UWGoldL2}{HTML}{FFEA3D}
+\definecolor{UWGoldL3}{HTML}{FFD54F}
+\definecolor{UWGoldL4}{HTML}{E4B429}
+\definecolor{carrot}{HTML}{EE693F}
+\definecolor{ivory}{HTML}{F1F3CE}
+\definecolor{emerald}{HTML}{265C00}
+\definecolor{turquise}{HTML}{5BC8AC}
+\definecolor{peacockblue}{HTML}{1E656D}
+\definecolor{spicy}{HTML}{B51D0A}
+\definecolor{bluegreen}{HTML}{5F968E}
+\definecolor{rust}{HTML}{9B4F0F}
+\definecolor{burntorange}{HTML}{DE7A22}
+\definecolor{sea}{HTML}{20948B}
+\definecolor{lagoon}{HTML}{6AB187}
+
+% Category colors
+\definecolor{emerging}{HTML}{2ecc71}
+\definecolor{mature}{HTML}{3498db}
+\definecolor{declining}{HTML}{e74c3c}
+\definecolor{experimental}{HTML}{f39c12}
+
+% Colores para los entornos bluebox, greenbox, redbox
+\definecolor{myblue}{RGB}{173,216,230}
+\definecolor{mygreen}{RGB}{144,238,144}
+\definecolor{myred}{RGB}{255,182,193}
+
+% Configuración de colores para los componentes de las diapositivas
+\setbeamercolor{background canvas}{bg=UWWhite}
+\setbeamercolor{author}{fg=UWGoldL3}
+\setbeamercolor{institute}{fg=UWMathPinkL3}
+\setbeamercolor{title}{fg=UWGrayL4}
+\setbeamercolor{section in head/foot}{bg=UWBlack, fg=UWGoldL3}
+\setbeamercolor{author in head/foot}{fg=UWGoldL3, bg=UWBlack}
+\setbeamercolor{title in head/foot}{fg=UWBlack, bg=UWGoldL3}
+\setbeamercolor{institute in head/foot}{fg=UWGoldL3, bg=UWBlack}
+\setbeamercolor{navigation symbols}{fg=UWBlack}
+\setbeamercolor{normal text}{fg=UWGrayL3}
+\setbeamercolor{section in toc}{fg=emerald}
+\setbeamercolor{subsection in toc}{fg=bluegreen}
+\setbeamercolor{frametitle}{fg=UWMathPinkL2, bg=UWGrayL1}
+\setbeamercolor{block title}{bg=emerald, fg=ivory}
+\setbeamercolor{block body}{bg=peacockblue!20, fg=peacockblue}
+\setbeamercolor{section number projected}{bg=turquise, fg=black}
+\setbeamercolor{block title example}{fg=rust, bg=sea!40}
+\setbeamercolor{block body example}{fg=burntorange, bg=lagoon!20}
+
+% Configuración de fuentes
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamerfont{section number projected}{family=\rmfamily, series=\bfseries, size=\normalsize}
+
+% Contadores para Definición, Teorema y Ejemplo
+\newcounter{defcounter}
+\newcounter{theocounter}
+\newcounter{excounter}
+
+% Redefinir los entornos bluebox, greenbox y redbox
+\newenvironment{bluebox}[1]
+{%
+  \stepcounter{defcounter}
+  \setbeamercolor{block title}{bg=myblue, fg=black}%
+  \begin{block}{Definition \thedefcounter\ (#1)}%
+}
+{\end{block}}
+
+\newenvironment{greenbox}[1]
+{%
+  \stepcounter{theocounter}
+  \setbeamercolor{block title}{bg=mygreen, fg=black}%
+  \begin{block}{Result \thetheocounter\ (#1)}%
+}
+{\end{block}}
+
+\newenvironment{redbox}[1]
+{%
+  \stepcounter{excounter}
+  \setbeamercolor{block title}{bg=myred, fg=black}%
+  \begin{block}{Finding \theexcounter\ (#1)}%
+}
+{\end{block}}
+
+% Cargar fuente para símbolos especiales
+\newfontface{\skullfont}{DejaVu Sans}[Scale=1.0]
+\newcommand{\skull}{\text{\skullfont ☠}}
+\newcommand{\bigskull}[1]{\text{\skullfont \fontsize{#1}{#1}\selectfont ☠}}
+\newfontface{\happyfont}{DejaVu Sans}[Scale=1.0]
+\newcommand{\happy}{\text{\happyfont ☺︎}}
+
+% Comandos para campos comunes
+\newcommand\course[1]{\def\insertcourse{#1}}
+\newcommand\class[1]{\def\insertclass{#1}}
+
+% Configuración de la diapositiva de título
+\setbeamertemplate{title page}{
+\begin{tikzpicture}[remember picture, overlay]
+\fill[UWWhite]
+  ([yshift=30pt]current page.west) rectangle (current page.south east);
+
+\fill[UWBlack]
+  ([yshift=30pt]current page.west) rectangle (current page.north east);
+
+\node[anchor=east] at ([yshift=-50pt,xshift=-15pt]current page.north east)
+  {
+  \includegraphics[width=0.4\linewidth]{UP_logo.jpg}
+  };
+
+\node[anchor=north west] at ([yshift=-70pt,xshift=15pt]current page.north west) (institute)
+	{
+	\parbox[t]{.78\paperwidth}{
+    \usebeamerfont{institute}\usebeamercolor[fg]{institute}\large\bfseries\insertinstitute}
+    };
+
+\node[anchor=west] at ([yshift=-45pt,xshift=15pt]current page.north west) (author)
+	{
+	\parbox[t]{.78\paperwidth}{
+    \usebeamerfont{author}\usebeamercolor[fg]{author}\Large\bfseries \insertauthor}
+    };
+
+\node[anchor=north] at ([yshift=-1pt]current page.center) (title)
+	{
+	\parbox[t]{\textwidth}{\huge\bfseries\centering
+	\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle}
+	};
+
+\node[anchor=north] at ([yshift=-50pt]current page.center) (course)
+	{
+	\parbox[t]{\paperwidth}{\centering\insertcourse}
+	};
+
+\node[anchor=north] at ([yshift=-70pt]current page.center) (class)
+	{
+	\parbox[t]{\paperwidth}{\centering\insertclass}
+	};
+\end{tikzpicture}
+}
+
+% Configuración de la cabecera
+\setbeamertemplate{headline}
+{%
+  \begin{beamercolorbox}{section in head/foot}
+    \vskip5pt\bfseries
+    \insertnavigation{\paperwidth}
+    \vskip2pt
+  \end{beamercolorbox}%
+}
+
+\renewcommand*{\slideentry}[6]{}
+
+% Configuración del pie de página
+\setbeamertemplate{footline}
+{
+	\leavevmode
+	\begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.5ex,dp=1.125ex,
+      leftskip=.3cm,rightskip=.3cm plus1fil]{author in head/foot}
+		\usebeamerfont{author in head/foot}\insertshortauthor
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.5ex,dp=1.125ex,
+      leftskip=.3cm,rightskip=.3cm plus1fil,center]{title in head/foot}
+      {\usebeamerfont{title in head/foot}\insertshorttitle}
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.5ex,dp=1.125ex,
+      leftskip=.3cm,rightskip=.3cm plus1fil]{institute in head/foot}
+      \hfill    {\usebeamercolor[fg]{institute in head/foot}\insertshortinstitute}
+	\end{beamercolorbox}%
+}
+
+% Número de diapositiva
+\setbeamertemplate{navigation symbols}{\bfseries\insertframenumber/\inserttotalframenumber}
+
+% Estilo TOC
+\setbeamertemplate{sections/subsections in toc}[ball]
+
+% Estilo de viñetas
+\setbeamertemplate{itemize item}{
+	\tikz{
+		\draw[fill=spicy,draw=none] (0, 0) rectangle(0.075, 0.075);
+		\draw[fill=spicy,draw=none] (0.075, 0.075) rectangle(0.15, 0.15);
+		\draw[fill=spicy,draw=none] (0, 0.15) rectangle(0.075, 0.225);
+	}
+}
+
+\setbeamertemplate{itemize subitem}{
+	\tikz{
+		\draw[fill=carrot,draw=none] (0, 0) rectangle(0.05, 0.05);
+		\draw[fill=carrot,draw=none] (0.05, 0.05) rectangle(0.1, 0.1);
+		\draw[fill=carrot,draw=none] (0, 0.1) rectangle(0.05, 0.15);
+	}
+}
+
+\AtBeginEnvironment{block}{
+	\setbeamertemplate{itemize item}{
+		\tikz{
+			\draw[fill=spicy,draw=none] (0, 0) rectangle(0.075, 0.075);
+			\draw[fill=spicy,draw=none] (0.075, 0.075) rectangle(0.15, 0.15);
+			\draw[fill=spicy,draw=none] (0, 0.15) rectangle(0.075, 0.225);
+		}
+	}
+	\setbeamertemplate{itemize subitem}{
+		\tikz{
+			\draw[fill=carrot,draw=none] (0, 0) rectangle(0.05, 0.05);
+			\draw[fill=carrot,draw=none] (0.05, 0.05) rectangle(0.1, 0.1);
+			\draw[fill=carrot,draw=none] (0, 0.1) rectangle(0.05, 0.15);
+		}
+	}
+}
+
+% Configuración de bloques
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamercovered{invisible}
+\usefonttheme[onlymath]{serif}
+\renewcommand{\thefootnote}{\ast}
+
+% Metadata de la presentación
+\title[\textbf{HW04 — Tech Ecosystem}]{GitHub Technology Innovation \& Ecosystem Tracking}
+
+\author[\textbf{Alejandro Ventura}]
+{Alejandro Ventura*\\
+al.venturam@up.edu.pe
+\footnotetext{\parbox{1\textwidth}{
+  Track B — Technology Innovation \& Ecosystem Tracking. HW04, Machine Learning / NLP / Applied AI.
+}}}
+
+\institute[\textbf{Universidad del Pacífico}]
+{Department of Economics and Finance\\
+Universidad del Pacífico}
+
+\course{Machine Learning / NLP / Applied AI — HW04}
+\class{Semester 2026-I}
