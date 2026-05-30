@@ -1,0 +1,30 @@
+{
+  "accuracy": 0.5506,
+  "macro_f1": 0.4126,
+  "per_class": {
+    "emerging": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 4
+    },
+    "mature": {
+      "precision": 0.6667,
+      "recall": 0.4615,
+      "f1": 0.5455,
+      "support": 13
+    },
+    "declining": {
+      "precision": 0.5714,
+      "recall": 0.7179,
+      "f1": 0.6364,
+      "support": 39
+    },
+    "experimental": {
+      "precision": 0.4839,
+      "recall": 0.4545,
+      "f1": 0.4688,
+      "support": 33
+    }
+  }
+}
