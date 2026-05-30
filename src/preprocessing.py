@@ -12,9 +12,15 @@ Track B — Technology Innovation & Ecosystem Tracking
 import os
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from src.utils import LABEL2ID
 
 RAW_PATH = "data/raw/repositories.csv"
 PROCESSED_PATH = "data/processed/repositories_clean.csv"
+SUMMARIZED_PATH = "data/processed/repositories_summarized.csv"
+LABELED_PATH = "data/labeled/repositories_labeled.csv"
+
+SPLITS_DIR = "data/splits"
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +130,67 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
+# Train / Validation / Test split
+# ---------------------------------------------------------------------------
+
+def split_dataset(
+    labeled_path: str = LABELED_PATH,
+    splits_dir: str = SPLITS_DIR,
+    train_size: float = 0.70,
+    val_size: float = 0.15,
+    test_size: float = 0.15,
+    random_state: int = 42,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Split the labeled dataset into train, validation, and test sets.
+
+    Uses stratified splitting to preserve label distribution across splits.
+    The test set is held out and never used during training.
+    """
+
+    df = pd.read_csv(labeled_path)
+    df = df.dropna(subset=["label", "summary"])
+    df["label_id"] = df["label"].map(LABEL2ID)
+
+    print(f"Total labeled samples: {len(df)}")
+    print(f"Label distribution:\n{df['label'].value_counts()}\n")
+
+    # First split: train vs (val + test)
+    train_df, temp_df = train_test_split(
+        df,
+        test_size=(val_size + test_size),
+        stratify=df["label"],
+        random_state=random_state,
+    )
+
+    # Second split: val vs test
+    relative_test_size = test_size / (val_size + test_size)
+    val_df, test_df = train_test_split(
+        temp_df,
+        test_size=relative_test_size,
+        stratify=temp_df["label"],
+        random_state=random_state,
+    )
+
+    # Save splits
+    os.makedirs(splits_dir, exist_ok=True)
+    train_df.to_csv(f"{splits_dir}/train.csv", index=False)
+    val_df.to_csv(f"{splits_dir}/val.csv", index=False)
+    test_df.to_csv(f"{splits_dir}/test.csv", index=False)
+
+    print(f"Split complete (stratified):")
+    print(f"  Train : {len(train_df)} ({len(train_df)/len(df):.0%})")
+    print(f"  Val   : {len(val_df)} ({len(val_df)/len(df):.0%})")
+    print(f"  Test  : {len(test_df)} ({len(test_df)/len(df):.0%})")
+    print(f"\nTrain label distribution:\n{train_df['label'].value_counts()}")
+    print(f"\nVal label distribution:\n{val_df['label'].value_counts()}")
+    print(f"\nTest label distribution:\n{test_df['label'].value_counts()}")
+    print(f"\nSaved to: {splits_dir}/")
+
+    return train_df, val_df, test_df
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -138,13 +205,10 @@ def run(raw_path: str = RAW_PATH, output_path: str = PROCESSED_PATH) -> pd.DataF
     print(f"\nPreprocessing complete.")
     print(f"  Shape: {df.shape}")
     print(f"  Saved to: {output_path}")
-    print(f"\nNew features added:")
-    new_cols = ["issue_resolution_rate", "stars_per_day", "fork_star_ratio",
-                "activity_score", "topic_count", "has_readme"]
-    print(df[new_cols].describe().round(4))
 
     return df
 
 
 if __name__ == "__main__":
     run()
+    split_dataset()
